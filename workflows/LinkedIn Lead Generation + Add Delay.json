@@ -1,0 +1,1251 @@
+{
+  "name": "LinkedIn Lead Generation + Add Delay",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 1
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -1024,
+        464
+      ],
+      "id": "b3e3fa3e-0689-4307-9b95-84410350aaec",
+      "name": "Trigger: Every 1 Min"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1g4OU9q3MF80eZ55NRz860CuSo8IROw7euB_pRX6Hlto",
+          "mode": "list",
+          "cachedResultName": "Leads Pipeline",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1g4OU9q3MF80eZ55NRz860CuSo8IROw7euB_pRX6Hlto/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1g4OU9q3MF80eZ55NRz860CuSo8IROw7euB_pRX6Hlto/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -784,
+        464
+      ],
+      "id": "3c25eef8-bb43-4bf0-8091-41d95fc3a877",
+      "name": "Get Leads from Sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ElgIyB82yQfMFqWB",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "route-new",
+                    "leftValue": "={{ $json['Status'] }}",
+                    "rightValue": "New",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "New Lead"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "route-fu1-status",
+                    "leftValue": "={{ $json['Status'] }}",
+                    "rightValue": "Message Sent",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  },
+                  {
+                    "id": "route-fu1-reply",
+                    "leftValue": "={{ $json['Reply Received'] }}",
+                    "rightValue": "Yes",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notEquals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Needs Follow-up 1"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "route-fu2-status",
+                    "leftValue": "={{ $json['Status'] }}",
+                    "rightValue": "Follow-up 1 Sent",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  },
+                  {
+                    "id": "route-fu2-reply",
+                    "leftValue": "={{ $json['Reply Received'] }}",
+                    "rightValue": "Yes",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notEquals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Needs Follow-up 2"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "route-reply-yes",
+                    "leftValue": "={{ $json['Reply Received'] }}",
+                    "rightValue": "Yes",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  },
+                  {
+                    "id": "route-reply-not-notified",
+                    "leftValue": "={{ $json['Reply Notified'] }}",
+                    "rightValue": "Yes",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notEquals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Client Replied"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -496,
+        416
+      ],
+      "id": "67bd3966-6047-4faa-b844-0735394a2b37",
+      "name": "Router: Lead Status"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -480,
+        848
+      ],
+      "id": "e2757301-5db3-4e9b-bb44-9fe88a95c684",
+      "name": "End / Skip (No Action Needed)"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "set-id-1",
+              "name": "lead_id",
+              "value": "={{ $json['ID'] }}",
+              "type": "string"
+            },
+            {
+              "id": "set-name-1",
+              "name": "lead_name",
+              "value": "={{ $json['Name'] }}",
+              "type": "string"
+            },
+            {
+              "id": "set-role-1",
+              "name": "lead_role",
+              "value": "={{ $json['Role'] }}",
+              "type": "string"
+            },
+            {
+              "id": "set-exp-1",
+              "name": "lead_experience",
+              "value": "={{ $json['Experience'] }}",
+              "type": "string"
+            },
+            {
+              "id": "set-loc-1",
+              "name": "lead_location",
+              "value": "={{ $json['Location'] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        0,
+        -176
+      ],
+      "id": "eeedd8c8-fa9b-428a-b0c2-07e2197dbd86",
+      "name": "Save Lead Data (First Msg)"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a recruiter from BrainerHub Solutions.\n\nCandidate Details:\nName: {{ $json[\"lead_name\"] || \"there\" }}\nRole: {{ $json[\"lead_role\"] || \"professional\" }}\nExperience: {{ $json[\"lead_experience\"] || \"some\" }}\nLocation: {{ $json[\"lead_location\"] || \"your region\" }}\n\nTask:\nWrite a short, natural LinkedIn message.\n\nRules:\n- Always use the actual Name (if available)\n- If Name is missing use Hi there\n- Mention Role naturally\n- Mention Experience only if meaningful (like 1+ years, experienced, etc.)\n- Keep it human, not robotic\n- Max 2-3 lines\n- No placeholders\n- End with a soft question\n\nTone: Friendly, slightly casual, recruiter-style\n\nOutput only the message, no extra text.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        240,
+        -176
+      ],
+      "id": "af299e0b-a13b-43ef-ae0c-3a3b41e54a61",
+      "name": "AI: Generate First Message",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "model": "llama-3.1-8b-instant",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        240,
+        0
+      ],
+      "id": "9ee2f591-5a39-4bb2-bd41-f457cf87806f",
+      "name": "Groq Chat Model (First)",
+      "credentials": {
+        "groqApi": {
+          "id": "t3fAxNwhZqQ8J5vn",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Sheet1",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ID": "={{ $('Save Lead Data (First Msg)').item.json.lead_id }}",
+            "AI Message": "={{ $json['output'] }}",
+            "Status": "Message Sent",
+            "Message Sent": "Yes",
+            "Last Action Date": "={{ $now.toISO() }}"
+          },
+          "matchingColumns": [
+            "ID"
+          ],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "AI Message",
+              "displayName": "AI Message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "Message Sent",
+              "displayName": "Message Sent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "Last Action Date",
+              "displayName": "Last Action Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        560,
+        -176
+      ],
+      "id": "6b3b6cff-ca15-4fa4-bed4-52b53c2c057a",
+      "name": "Update: First Message Sent",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ElgIyB82yQfMFqWB",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "set-id-2",
+              "name": "lead_id",
+              "value": "={{ $json['ID'] }}",
+              "type": "string"
+            },
+            {
+              "id": "set-name-2",
+              "name": "lead_name",
+              "value": "={{ $json['Name'] }}",
+              "type": "string"
+            },
+            {
+              "id": "set-role-2",
+              "name": "lead_role",
+              "value": "={{ $json['Role'] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -16,
+        160
+      ],
+      "id": "0c55de15-e5fd-4e88-8d53-520d1d848019",
+      "name": "Save Lead Data (Follow-up 1)"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Random delay between 2 to 5 minutes (in seconds)\nconst minSeconds = 2 * 60;\nconst maxSeconds = 5 * 60;\nconst randomSeconds = Math.floor(Math.random() * (maxSeconds - minSeconds + 1)) + minSeconds;\n\nreturn [{\n  json: {\n    ...($input.first().json),\n    delay_seconds: randomSeconds,\n    delay_human: `${Math.floor(randomSeconds / 60)}m ${randomSeconds % 60}s`\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        160
+      ],
+      "id": "414e7f55-2366-41bd-ba5f-8991337b0323",
+      "name": "Random Delay (Follow-up 1)"
+    },
+    {
+      "parameters": {
+        "amount": "={{ $json.delay_seconds }}"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        464,
+        160
+      ],
+      "id": "e2d78a03-051f-409b-a795-201d91052033",
+      "name": "Wait (Follow-up 1 Delay)",
+      "webhookId": "wait-fu1-webhook"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a recruiter from BrainerHub Solutions.\n\nCandidate Details:\nName: {{ $json[\"lead_name\"] || \"there\" }}\nRole: {{ $json[\"lead_role\"] || \"professional\" }}\n\nContext:\n- You already sent a first message\n- The candidate has not replied yet\n\nTask:\nWrite a short LinkedIn follow-up message.\n\nRules:\n- Always use the actual Name (if available)\n- If Name is missing use Hi there\n- Keep it 1-2 lines only\n- Friendly reminder, not pushy\n- No sales tone\n- Sound human and casual\n- End with a soft question\n\nTone: Friendly, polite, recruiter-style\n\nOutput only the message, no extra text.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        704,
+        160
+      ],
+      "id": "378f409d-8617-4db0-aed5-4766d0916ba9",
+      "name": "AI: Generate Follow-up 1",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "model": "llama-3.1-8b-instant",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        704,
+        336
+      ],
+      "id": "2cd907b9-63f4-41f7-aed9-89993e5fe544",
+      "name": "Groq Chat Model (FU1)",
+      "credentials": {
+        "groqApi": {
+          "id": "t3fAxNwhZqQ8J5vn",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Sheet1",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ID": "={{ $('Save Lead Data (Follow-up 1)').item.json.lead_id }}",
+            "Follow_up_1": "={{ $json['output'] }}",
+            "Status": "Follow-up 1 Sent",
+            "Last Action Date": "={{ $now.toISO() }}"
+          },
+          "matchingColumns": [
+            "ID"
+          ],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Follow_up_1",
+              "displayName": "Follow_up_1",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "Last Action Date",
+              "displayName": "Last Action Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1024,
+        160
+      ],
+      "id": "ee2d788d-a935-4656-aa96-3b7dab97f05c",
+      "name": "Update: Follow-up 1 Sent",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ElgIyB82yQfMFqWB",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "set-id-3",
+              "name": "lead_id",
+              "value": "={{ $json['ID'] }}",
+              "type": "string"
+            },
+            {
+              "id": "set-name-3",
+              "name": "lead_name",
+              "value": "={{ $json['Name'] }}",
+              "type": "string"
+            },
+            {
+              "id": "set-role-3",
+              "name": "lead_role",
+              "value": "={{ $json['Role'] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -16,
+        560
+      ],
+      "id": "9330e4f7-7c9e-4378-a568-bb9852854915",
+      "name": "Save Lead Data (Follow-up 2)"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Random delay between 2 to 5 minutes (in seconds)\nconst minSeconds = 2 * 60;\nconst maxSeconds = 5 * 60;\nconst randomSeconds = Math.floor(Math.random() * (maxSeconds - minSeconds + 1)) + minSeconds;\n\nreturn [{\n  json: {\n    ...($input.first().json),\n    delay_seconds: randomSeconds,\n    delay_human: `${Math.floor(randomSeconds / 60)}m ${randomSeconds % 60}s`\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        560
+      ],
+      "id": "5db39ab5-8867-4310-aebf-f0cbd66dcc2d",
+      "name": "Random Delay (Follow-up 2)"
+    },
+    {
+      "parameters": {
+        "amount": "={{ $json.delay_seconds }}"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        464,
+        560
+      ],
+      "id": "d726bd04-1b24-4e12-8106-23eb6c9a705a",
+      "name": "Wait (Follow-up 2 Delay)",
+      "webhookId": "wait-fu2-webhook"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a recruiter from BrainerHub Solutions.\n\nCandidate Details:\nName: {{ $json[\"lead_name\"] || \"there\" }}\nRole: {{ $json[\"lead_role\"] || \"professional\" }}\n\nContext:\n- You already sent 2 messages\n- The candidate has not replied yet\n\nTask:\nWrite a short final follow-up message.\n\nRules:\n- Keep it very short, 1-2 lines\n- Friendly and polite\n- Slight closing tone\n- No pressure\n- End with soft question\n\nTone: Friendly, respectful\n\nOutput only the message, no extra text.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        704,
+        560
+      ],
+      "id": "223ce74c-2559-4206-abcc-066f791e08b7",
+      "name": "AI: Generate Follow-up 2",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "model": "llama-3.1-8b-instant",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        704,
+        736
+      ],
+      "id": "a78f3a42-2c9d-4cfe-b2fb-b36e74e42e6b",
+      "name": "Groq Chat Model (FU2)",
+      "credentials": {
+        "groqApi": {
+          "id": "t3fAxNwhZqQ8J5vn",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Sheet1",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ID": "={{ $('Save Lead Data (Follow-up 2)').item.json.lead_id }}",
+            "Follow_up_2": "={{ $json['output'] }}",
+            "Status": "Follow-up 2 Sent",
+            "Last Action Date": "={{ $now.toISO() }}"
+          },
+          "matchingColumns": [
+            "ID"
+          ],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Follow_up_2",
+              "displayName": "Follow_up_2",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "Last Action Date",
+              "displayName": "Last Action Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1056,
+        560
+      ],
+      "id": "bd89ead4-ea98-4cfb-8550-fa67120e9182",
+      "name": "Update: Follow-up 2 Sent",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ElgIyB82yQfMFqWB",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cr-name",
+              "name": "client_name",
+              "value": "={{ $json['Name'] }}",
+              "type": "string"
+            },
+            {
+              "id": "cr-reply",
+              "name": "reply_message",
+              "value": "={{ $json['Reply Message'] || '(No message provided)' }}",
+              "type": "string"
+            },
+            {
+              "id": "cr-ts",
+              "name": "timestamp",
+              "value": "={{ $now.toISO() }}",
+              "type": "string"
+            },
+            {
+              "id": "cr-id",
+              "name": "lead_id",
+              "value": "={{ $json['ID'] }}",
+              "type": "string"
+            },
+            {
+              "id": "cr-status",
+              "name": "lead_status",
+              "value": "={{ $json['Status'] }}",
+              "type": "string"
+            },
+            {
+              "id": "cr-conv",
+              "name": "conversation_id",
+              "value": "={{ $json['Conversation ID'] ?? $json['ID'] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -16,
+        1072
+      ],
+      "id": "9e50ede4-b253-475d-a842-d02fae099d97",
+      "name": "Capture Reply Data"
+    },
+    {
+      "parameters": {
+        "sendTo": "heets.brainerhub@gmail.com",
+        "subject": "=New LinkedIn Reply Received – {{ $json['client_name'] }}",
+        "message": "=<h2>📩 New LinkedIn Reply Received</h2>\n\n<p><strong>Name:</strong> {{ $json['client_name'] }}</p>\n<p><strong>Lead ID:</strong> {{ $json['lead_id'] }}</p>\n<p><strong>Status at Reply:</strong> {{ $json['lead_status'] }}</p>\n<p><strong>Timestamp:</strong> {{ $json['timestamp'] }}</p>\n\n<hr>\n\n<p><strong>Reply Message:</strong></p>\n<blockquote style=\"background:#f5f5f5;padding:10px;border-left:4px solid #4285f4;font-style:italic;\">\n  {{ $json['reply_message'] }}\n</blockquote>\n\n<p style=\"color:#888;font-size:12px;\">Sent by LinkedIn Lead Gen Automation · BrainerHub Solutions</p>",
+        "options": {
+          "appendAttribution": false,
+          "replyTo": ""
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        208,
+        928
+      ],
+      "id": "8c0d36f9-b171-40b1-aa1e-cb81737d86f0",
+      "name": "Send Email: Lead Reply",
+      "webhookId": "a13658d1-d75b-4f23-847e-8524f00c5d2c",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "i3w2Z2VFjOTfsG1P",
+          "name": "Gmail account"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        496,
+        1056
+      ],
+      "id": "38214e8f-2f71-4d89-bb6c-1db215938627",
+      "name": "Merge Notifications"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Log email error and decide if sheet update should proceed\nreturn $input.all().map(item => {\n  const error = item.json?.error;\n  return {\n    json: {\n      logged: error ? true : false,\n      lead_id: item.json?.lead_id || '',\n      should_update: error ? false : true,\n      error_detail: error || null,\n      ts: new Date().toISOString()\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        736,
+        1056
+      ],
+      "id": "1fb313aa-1c08-4e44-9466-ab267aa42ece",
+      "name": "Log Email Error (if any)",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "check-should-update",
+              "leftValue": "={{ $json.should_update }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        976,
+        1056
+      ],
+      "id": "5591f663-2cab-4230-97b4-0d80f00f81e7",
+      "name": "Should Update Sheet?"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Sheet1",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ID": "={{ $json.lead_id }}",
+            "Reply Notified": "Yes",
+            "Status": "Replied",
+            "Last Action Date": "={{ $now.toISO() }}"
+          },
+          "matchingColumns": [
+            "ID"
+          ],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Reply Notified",
+              "displayName": "Reply Notified",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "Last Action Date",
+              "displayName": "Last Action Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1232,
+        1040
+      ],
+      "id": "f2409814-086c-46e8-9318-50d79be25093",
+      "name": "Update: Reply Notified",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ElgIyB82yQfMFqWB",
+          "name": "Google Sheets account"
+        }
+      },
+      "continueOnFail": true
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Trigger: Every 1 Min": {
+      "main": [
+        [
+          {
+            "node": "Get Leads from Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Leads from Sheet": {
+      "main": [
+        [
+          {
+            "node": "Router: Lead Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Router: Lead Status": {
+      "main": [
+        [
+          {
+            "node": "Save Lead Data (First Msg)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Save Lead Data (Follow-up 1)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Save Lead Data (Follow-up 2)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Capture Reply Data",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "End / Skip (No Action Needed)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Lead Data (First Msg)": {
+      "main": [
+        [
+          {
+            "node": "AI: Generate First Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI: Generate First Message": {
+      "main": [
+        [
+          {
+            "node": "Update: First Message Sent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model (First)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI: Generate First Message",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Lead Data (Follow-up 1)": {
+      "main": [
+        [
+          {
+            "node": "Random Delay (Follow-up 1)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Random Delay (Follow-up 1)": {
+      "main": [
+        [
+          {
+            "node": "Wait (Follow-up 1 Delay)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait (Follow-up 1 Delay)": {
+      "main": [
+        [
+          {
+            "node": "AI: Generate Follow-up 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI: Generate Follow-up 1": {
+      "main": [
+        [
+          {
+            "node": "Update: Follow-up 1 Sent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model (FU1)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI: Generate Follow-up 1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Lead Data (Follow-up 2)": {
+      "main": [
+        [
+          {
+            "node": "Random Delay (Follow-up 2)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Random Delay (Follow-up 2)": {
+      "main": [
+        [
+          {
+            "node": "Wait (Follow-up 2 Delay)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait (Follow-up 2 Delay)": {
+      "main": [
+        [
+          {
+            "node": "AI: Generate Follow-up 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI: Generate Follow-up 2": {
+      "main": [
+        [
+          {
+            "node": "Update: Follow-up 2 Sent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model (FU2)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI: Generate Follow-up 2",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Capture Reply Data": {
+      "main": [
+        [
+          {
+            "node": "Send Email: Lead Reply",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge Notifications",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Send Email: Lead Reply": {
+      "main": [
+        [
+          {
+            "node": "Merge Notifications",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Notifications": {
+      "main": [
+        [
+          {
+            "node": "Log Email Error (if any)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Email Error (if any)": {
+      "main": [
+        [
+          {
+            "node": "Should Update Sheet?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Should Update Sheet?": {
+      "main": [
+        [
+          {
+            "node": "Update: Reply Notified",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "46f9a18d-dc82-4562-ada5-12430aa6193c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7f9fa175023aadf2913c21fa1454cb00c4f7ff38c064b1272ba895dddaf96808"
+  },
+  "id": "4RgYymVrQLCqs9cF",
+  "tags": []
+}

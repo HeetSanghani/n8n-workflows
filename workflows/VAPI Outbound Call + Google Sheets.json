@@ -1,0 +1,598 @@
+{
+  "name": "VAPI Outbound Call + Google Sheets",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "114b552a-3a17-409e-8977-88aa351fab35",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1152,
+        528
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "vapi-call-ended",
+        "options": {}
+      },
+      "id": "232f2686-9b64-4c69-9430-90154921d93a",
+      "name": "Webhook - VAPI Call Ended",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -1184,
+        864
+      ],
+      "webhookId": "vapi-call-ended"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "cond2",
+              "leftValue": "={{ $json.body.message.type }}",
+              "rightValue": "end-of-call-report",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "fbc46bcb-0f3d-414a-8b3d-c95b0e05b9d2",
+      "name": "Is End of Call?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -960,
+        864
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d1",
+              "name": "callId",
+              "value": "={{ $json.body.message.call.id }}",
+              "type": "string"
+            },
+            {
+              "id": "d2",
+              "name": "customerName",
+              "value": "={{ $json.body.message.call.customer.name }}",
+              "type": "string"
+            },
+            {
+              "id": "d3",
+              "name": "customerPhone",
+              "value": "={{ $json.body.message.call.customer.number }}",
+              "type": "string"
+            },
+            {
+              "id": "d4",
+              "name": "callStatus",
+              "value": "={{ $json.body.message.endedReason }}",
+              "type": "string"
+            },
+            {
+              "id": "d5",
+              "name": "duration",
+              "value": "={{ Math.round(($json.body.message.durationSeconds || 0)) }}",
+              "type": "string"
+            },
+            {
+              "id": "d6",
+              "name": "cost",
+              "value": "={{ $json.body.message.cost }}",
+              "type": "string"
+            },
+            {
+              "id": "d7",
+              "name": "summary",
+              "value": "={{ $json.body.message.analysis.summary }}",
+              "type": "string"
+            },
+            {
+              "id": "d8",
+              "name": "transcript",
+              "value": "={{ $json.body.message.transcript }}",
+              "type": "string"
+            },
+            {
+              "id": "d9",
+              "name": "recordingUrl",
+              "value": "={{ $json.body.message.recordingUrl }}",
+              "type": "string"
+            },
+            {
+              "id": "d10",
+              "name": "calledAt",
+              "value": "={{ $json.body.message.call.createdAt }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f1d6b91c-4e9d-4ce9-926e-e23ba4c64fee",
+      "name": "Extract Call Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -720,
+        848
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1xpJJ6iqFvcqC_LNOY1_P1B7X3bk3tePTbmQxmAQJbwY",
+          "mode": "list",
+          "cachedResultName": "Calling Agent",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1xpJJ6iqFvcqC_LNOY1_P1B7X3bk3tePTbmQxmAQJbwY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1xpJJ6iqFvcqC_LNOY1_P1B7X3bk3tePTbmQxmAQJbwY/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Call ID": "={{ $json.callId }}",
+            "Name": "={{ $json.customerName }}",
+            "Phone No.": "={{ $json.customerPhone }}",
+            "Status": "={{ $json.callStatus }}",
+            "Duration": "={{ $json.duration }}",
+            "Cost": "={{ $json.cost }}",
+            "Summary": "={{ $json.summary }}",
+            "Transcript": "={{ $json.transcript }}",
+            "Recording URL": "={{ $json.recordingUrl }}",
+            "Called At": "={{ $json.calledAt }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Call ID",
+              "displayName": "Call ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Phone No.",
+              "displayName": "Phone No.",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Duration",
+              "displayName": "Duration",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Cost",
+              "displayName": "Cost",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Summary",
+              "displayName": "Summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Transcript",
+              "displayName": "Transcript",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Interest Level",
+              "displayName": "Interest Level",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Callback Time",
+              "displayName": "Callback Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Called At",
+              "displayName": "Called At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Recording URL",
+              "displayName": "Recording URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "a8e35090-0f14-4939-9338-ca89ec430cc6",
+      "name": "Save to Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -496,
+        848
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ElgIyB82yQfMFqWB",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "field1",
+              "name": "customerPhone",
+              "value": "+919824052103",
+              "type": "string"
+            },
+            {
+              "id": "field2",
+              "name": "customerName",
+              "value": "Heet Patel",
+              "type": "string"
+            },
+            {
+              "id": "field3",
+              "name": "assistantId",
+              "value": "46eb0238-b38b-41b7-b4ca-ed4dd9150dd3",
+              "type": "string"
+            },
+            {
+              "id": "field4",
+              "name": "phoneNumberId",
+              "value": "29a956cf-6b8a-495a-b754-727f9d1ca750",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "0685c4cb-69a7-4a52-af55-d11361acd8db",
+      "name": "Set Call Data1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -960,
+        528
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.vapi.ai/call/phone",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_TOKEN_HERE"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"assistantId\": \"{{ $json.assistantId }}\",\n  \"phoneNumberId\": \"{{ $json.phoneNumberId }}\",\n  \"customer\": {\n    \"number\": \"{{ $json.customerPhone }}\",\n    \"name\": \"{{ $json.customerName }}\"\n  }\n}",
+        "options": {}
+      },
+      "id": "86fa1ab5-b346-41e9-b2e3-d18fb9c8c06a",
+      "name": "VAPI - Create Call1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -752,
+        528
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "cond1",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "queued",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "e684e795-ddd2-49c9-afa0-efc457e570e4",
+      "name": "Call Created Successfully?1",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -528,
+        528
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "s1",
+              "name": "result",
+              "value": "✅ Call queued successfully!",
+              "type": "string"
+            },
+            {
+              "id": "s2",
+              "name": "callId",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "s3",
+              "name": "callStatus",
+              "value": "={{ $json.status }}",
+              "type": "string"
+            },
+            {
+              "id": "s4",
+              "name": "calledNumber",
+              "value": "={{ $json.customer.number }}",
+              "type": "string"
+            },
+            {
+              "id": "s5",
+              "name": "calledName",
+              "value": "={{ $json.customer.name }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "1a23d13f-b4a7-4582-9b50-e5144fe7bb5a",
+      "name": "Success - Log Call1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -304,
+        416
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e1",
+              "name": "result",
+              "value": "❌ Call failed!",
+              "type": "string"
+            },
+            {
+              "id": "e2",
+              "name": "error",
+              "value": "={{ $json.message }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d4858959-9500-42b7-a84d-814258343396",
+      "name": "Failed - Log Error1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -304,
+        640
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Set Call Data1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook - VAPI Call Ended": {
+      "main": [
+        [
+          {
+            "node": "Is End of Call?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is End of Call?": {
+      "main": [
+        [
+          {
+            "node": "Extract Call Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Call Data": {
+      "main": [
+        [
+          {
+            "node": "Save to Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Call Data1": {
+      "main": [
+        [
+          {
+            "node": "VAPI - Create Call1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "VAPI - Create Call1": {
+      "main": [
+        [
+          {
+            "node": "Call Created Successfully?1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Created Successfully?1": {
+      "main": [
+        [
+          {
+            "node": "Success - Log Call1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Failed - Log Error1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "b98d077c-cc22-4a7c-bbd2-87a8844030eb",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7f9fa175023aadf2913c21fa1454cb00c4f7ff38c064b1272ba895dddaf96808"
+  },
+  "id": "hcU2N9pGTxT9zwgj",
+  "tags": []
+}
